@@ -13,52 +13,59 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	dirPerm  = 0o755
+	filePerm = 0o600
+)
+
 func main() {
 	configPath := flag.String("config", "", "Path to YAML config")
 	flag.Parse()
 
 	configData, err := os.ReadFile(*configPath)
 	if err != nil {
-		panic("Cannot read config file")
+		panic(err)
 	}
 
 	var paths dataprocessor.FilePaths
+
 	err = yaml.Unmarshal(configData, &paths)
-	if err != nil || paths.Input == "" {
-		panic("Invalid config format")
+	if err != nil {
+		panic(err)
 	}
 
 	inputFile, err := os.Open(paths.Input)
 	if err != nil {
-		panic("Cannot open input file")
+		panic(err)
 	}
 
 	xmlDecoder := xml.NewDecoder(inputFile)
 	xmlDecoder.CharsetReader = charset.NewReaderLabel
 
 	var currencies currencyhandler.CurrencyList
+
 	err = xmlDecoder.Decode(&currencies)
 	if err != nil {
-		panic("XML parsing failed")
+		panic(err)
 	}
-	inputFile.Close()
+
+	_ = inputFile.Close()
 
 	currencyhandler.SortCurrencies(&currencies)
-
 	jsonOutput := dataprocessor.ConvertToJSON(currencies)
 
 	outputData, err := json.MarshalIndent(jsonOutput, "", "  ")
 	if err != nil {
-		panic("JSON encoding failed")
+		panic(err)
 	}
 
-	err = os.MkdirAll(filepath.Dir(paths.Output), 0755)
+	err = os.MkdirAll(filepath.Dir(paths.Output), dirPerm)
 	if err != nil {
-		panic("Cannot create output directory")
+		panic(err)
 	}
 
-	err = os.WriteFile(paths.Output, outputData, 0644)
+	err = os.WriteFile(paths.Output, outputData, filePerm)
 	if err != nil {
-		panic("Cannot write output file")
+		panic(err)
 	}
 }

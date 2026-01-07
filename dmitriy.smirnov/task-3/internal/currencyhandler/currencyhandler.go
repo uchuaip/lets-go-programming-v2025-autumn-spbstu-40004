@@ -30,8 +30,12 @@ func (list CurrencyList) Less(i, j int) bool {
 	firstValue, err1 := strconv.ParseFloat(list.Items[i].Value, 64)
 	secondValue, err2 := strconv.ParseFloat(list.Items[j].Value, 64)
 
-	if err1 != nil || err2 != nil {
-		panic("Value parsing error during comparison")
+	if err1 != nil {
+		panic(err1)
+	}
+
+	if err2 != nil {
+		panic(err2)
 	}
 
 	return firstValue < secondValue
@@ -41,5 +45,6 @@ func SortCurrencies(list *CurrencyList) {
 	for i := range list.Items {
 		list.Items[i].Value = strings.ReplaceAll(strings.TrimSpace(list.Items[i].Value), ",", ".")
 	}
+
 	sort.Sort(sort.Reverse(list))
 }
