@@ -12,8 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-//go:generate mockery --all --testonly --quiet --outpkg wifi_test --output .
-
 var errExpected = errors.New("expected error")
 
 type testCase struct {
