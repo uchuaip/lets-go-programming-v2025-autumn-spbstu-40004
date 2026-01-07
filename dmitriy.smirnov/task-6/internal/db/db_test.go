@@ -145,7 +145,7 @@ func TestGetUniqueNames(t *testing.T) {
 			errContain: "rows error",
 		},
 	}
-
+	//d
 	for i, tc := range cases {
 		func() {
 			dbConn, mock, err := sqlmock.New()
