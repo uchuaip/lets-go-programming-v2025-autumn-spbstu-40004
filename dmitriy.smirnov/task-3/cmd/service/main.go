@@ -1,0 +1,64 @@
+package main
+
+import (
+	"encoding/json"
+	"encoding/xml"
+	"flag"
+	"os"
+	"path/filepath"
+
+	"github.com/uchuaip/task-3/internal/currencyhandler"
+	"github.com/uchuaip/task-3/internal/dataprocessor"
+	"golang.org/x/net/html/charset"
+	"gopkg.in/yaml.v3"
+)
+
+func main() {
+	configPath := flag.String("config", "", "Path to YAML config")
+	flag.Parse()
+
+	configData, err := os.ReadFile(*configPath)
+	if err != nil {
+		panic("Cannot read config file")
+	}
+
+	var paths dataprocessor.FilePaths
+	err = yaml.Unmarshal(configData, &paths)
+	if err != nil || paths.Input == "" {
+		panic("Invalid config format")
+	}
+
+	inputFile, err := os.Open(paths.Input)
+	if err != nil {
+		panic("Cannot open input file")
+	}
+
+	xmlDecoder := xml.NewDecoder(inputFile)
+	xmlDecoder.CharsetReader = charset.NewReaderLabel
+
+	var currencies currencyhandler.CurrencyList
+	err = xmlDecoder.Decode(&currencies)
+	if err != nil {
+		panic("XML parsing failed")
+	}
+	inputFile.Close()
+
+	currencyhandler.SortCurrencies(&currencies)
+
+	jsonOutput := dataprocessor.ConvertToJSON(currencies)
+
+	outputData, err := json.MarshalIndent(jsonOutput, "", "  ")
+	if err != nil {
+		panic("JSON encoding failed")
+	}
+
+	err = os.MkdirAll(filepath.Dir(paths.Output), 0755)
+	if err != nil {
+		panic("Cannot create output directory")
+	}
+
+	err = os.WriteFile(paths.Output, outputData, 0644)
+	if err != nil {
+		panic("Cannot write output file")
+	}
+}
