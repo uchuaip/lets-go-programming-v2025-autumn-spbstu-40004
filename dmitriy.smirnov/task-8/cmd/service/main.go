@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 
-	"uchuaip/task-8/config"
+	"uchuaip/task-8/internal/config"
 )
 
 func main() {
-	config, err := config.ParseConfig()
+	cfg, err := config.Load()
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println(err)
 
 		return
 	}
 
-	fmt.Print(config.Environment, " ", config.LogLevel)
+	fmt.Print(cfg.Environment, " ", cfg.LogLevel)
 }
