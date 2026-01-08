@@ -1,11 +1,11 @@
-//go:build dev
-// +build dev
+//go:build !dev
+// +build !dev
 
 package config
 
 import _ "embed"
 
-//go:embed dev.yaml
-var devYAML []byte
+//go:embed prod.yaml
+var prodYAML []byte
 
-func rawYAML() []byte { return devYAML }
+func rawYAML() []byte { return prodYAML }
